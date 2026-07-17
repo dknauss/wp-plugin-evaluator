@@ -4,7 +4,7 @@ A single-file, interactive tool for deciding whether a WordPress plugin — or a
 extension, or any other installable code — earns a place in a site you build, maintain,
 or stake your name on.
 
-**[▶ Open the live tool](https://dknauss.github.io/wp-plugin-evaluator/)** *(update this link once GitHub Pages is enabled)*
+**[▶ Open the live tool](https://dknauss.github.io/wp-plugin-evaluator/)**
 
 ![Verdict: a weighted score and go/no-go recommendation](https://img.shields.io/badge/verdict-live%20scoring-2271b1)
 
