@@ -156,7 +156,7 @@
   <section class="card" data-card="1">
     <div class="cardhead">
       <h2><span class="step-num">1</span> Plugin Details &amp; Classification</h2>
-      <span class="progress">Card 1 / 11</span>
+      <span class="progress">Card 1 / 10</span>
     </div>
     <div class="meta">
       <div><label>Plugin / Theme</label><input id="m-name" placeholder="e.g. Two-Factor"></div>
@@ -187,7 +187,7 @@
   <section class="card" data-card="2">
     <div class="cardhead">
       <h2><span class="step-num">2</span> Fit Check — The Right Tool For The Job</h2>
-      <span class="progress">Card 2 / 11</span>
+      <span class="progress">Card 2 / 10</span>
     </div>
     <p class="desc">If it isn't <b>necessary</b>, stop before you spend a minute vetting it.</p>
     <div id="fit"></div>
@@ -198,7 +198,7 @@
   <section class="card" data-card="3">
     <div class="cardhead">
       <h2><span class="step-num">3</span> Instant-Reject Filters</h2>
-      <span class="progress">Card 3 / 11</span>
+      <span class="progress">Card 3 / 10</span>
     </div>
     <p class="desc">Check every box that's <b>true and good</b>. Any <b>unchecked</b> filter is a hard stop — no score can buy it back.</p>
     <div id="reject"></div>
@@ -216,22 +216,11 @@
 
   <div id="sections"></div>
 
-  <!-- CARD 10: HARD FAIL -->
+  <!-- CARD 10: DECISION -->
   <section class="card" data-card="10">
     <div class="cardhead">
-      <h2><span class="step-num">10</span> Hard-Fail Overrides</h2>
-      <span class="progress">Card 10 / 11</span>
-    </div>
-    <p class="desc">Auto-reject regardless of total. These encode "passed the math, still a no."</p>
-    <div id="hard"></div>
-    <div class="flag reject" id="hard-flag">⛔ Hard-fail override active — Verdict is <b>REJECT</b> regardless of score.</div>
-  </section>
-
-  <!-- CARD 11: DECISION -->
-  <section class="card" data-card="11">
-    <div class="cardhead">
-      <h2><span class="step-num">11</span> Decision</h2>
-      <span class="progress">Card 11 / 11</span>
+      <h2><span class="step-num">10</span> Decision</h2>
+      <span class="progress">Card 10 / 10</span>
     </div>
     <label style="font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Conditions / Hardening Applied</label>
     <textarea id="d-cond" rows="2" placeholder="Disabled notices, telemetry off, capability limits, dashboard widget removed…"></textarea>
@@ -291,10 +280,10 @@ const FIT = [
 ];
 const REJECT = [
   ["Maintained","Updated within ~12 months; \"Tested Up To\" no more than 2 major WP versions behind."],
-  ["No open unpatched vulnerability","Checked Patchstack + WPScan; nothing sitting unfixed."],
+  ["No known unpatched vulnerability","Checked Patchstack + WPScan; nothing disclosed sitting unfixed."],
   ["Legit provenance","From WordPress.org or the official vendor — never nulled / \"GPL club\"."],
   ["Readable code","No obfuscated/encrypted PHP; no install-time data exfiltration."],
-  ["Doesn't hijack the admin","No undismissable everywhere-upsell banners (guideline 11)."],
+  ["Doesn't hijack or exploit the admin","No undismissable everywhere-nags, injected remote vendor-controlled content, or security-scare marketing (guideline 11)."],
 ];
 /* items: [n, text, optionalWeightOverride] */
 const SECTIONS = [
@@ -343,12 +332,6 @@ const SECTIONS = [
     ["3","Graceful lapse behavior (stops updating, keeps working)"],
   ]},
 ];
-const HARD = [
-  ["Any Step 3 instant-reject filter failed"],
-  ["8.1 = 0 — injects remote content / undismissable everywhere-nag / security-scare marketing"],
-  ["7.1 or 7.7 = 0 (fatals on install, or scorched-earth uninstall) with no fix in sight"],
-  ["Known unpatched security vulnerability"],
-];
 const RUBRIC = [
   ["No admin notices, or a genuine one-time setup prompt","🟢 3"],
   ["Functional, dismissible notices that stay dismissed","🟢 3"],
@@ -357,8 +340,8 @@ const RUBRIC = [
   ["\"Go pro\" nag on every admin page","🔴 0–1"],
   ["Can't be dismissed, or reappears after dismissal","🔴 0"],
   ["Shown to users who can't act (editors, subscribers)","🔴 0"],
-  ["Injects remote vendor-controlled content","🔴 0 + hard-fail"],
-  ["Security-scare marketing (\"your site is at risk — upgrade\")","🔴 0 + hard-fail"],
+  ["Injects remote vendor-controlled content","🔴 0 (instant-reject)"],
+  ["Security-scare marketing (\"your site is at risk — upgrade\")","🔴 0 (instant-reject)"],
 ];
 
 /* ---------- STATE ---------- */
@@ -410,7 +393,7 @@ SECTIONS.forEach(sec=>{
   const card=el(`<section class="card" data-card="${sec.card}" data-sec="${sec.card}">
     <div class="cardhead">
       <h2><span class="step-num">${sec.card}</span> ${sec.title}</h2>
-      <span class="progress">Card ${sec.card} / 11</span>
+      <span class="progress">Card ${sec.card} / 10</span>
     </div>
     <div class="desc" style="display:flex;align-items:center;gap:8px">
       <span class="weight">weight ×${sec.weight}</span>
@@ -442,15 +425,6 @@ SECTIONS.forEach(sec=>{
   secBox.appendChild(card);
 });
 
-/* ---------- BUILD: hard-fail ---------- */
-const hardBox=document.getElementById('hard');
-HARD.forEach((h,i)=>{
-  const id='hard'+i;
-  hardBox.appendChild(el(`<div class="checkrow">
-    <input type="checkbox" id="${id}" class="hard">
-    <label for="${id}">${h[0]}</label></div>`));
-});
-
 /* today */
 document.getElementById('m-date').valueAsDate=new Date();
 
@@ -461,7 +435,7 @@ function setScore(id,v,bs){
   [...bs.children].forEach(b=>b.setAttribute('aria-pressed', String(scores[id]===b.dataset.v)));
   recalc();
 }
-document.querySelectorAll('.rej,.hard,#fit input').forEach(c=>c.addEventListener('change',recalc));
+document.querySelectorAll('.rej,#fit input').forEach(c=>c.addEventListener('change',recalc));
 
 function recalc(){
   let earned=0,maxApplicable=0;
@@ -487,10 +461,7 @@ function recalc(){
   const rejFail = [...document.querySelectorAll('.rej')].some(b=>!b.checked) && rejTouched();
   document.getElementById('reject-flag').classList.toggle('show',rejFail);
 
-  const hardFail=[...document.querySelectorAll('.hard')].some(b=>b.checked);
-  document.getElementById('hard-flag').classList.toggle('show',hardFail);
-
-  renderVerdict(pct,earned,maxApplicable,{necFail,rejFail,hardFail});
+  renderVerdict(pct,earned,maxApplicable,{necFail,rejFail});
 }
 function anyFitTouched(){return [...document.querySelectorAll('#fit input')].some(b=>b.checked);}
 function rejTouched(){return Object.keys(scores).length>0 || [...document.querySelectorAll('.rej')].some(b=>b.checked);}
@@ -500,7 +471,7 @@ function renderVerdict(pct,earned,max,flags){
         val=document.getElementById('v-val'),note=document.getElementById('v-note'),pts=document.getElementById('v-pts');
   const C=201;
   let verdict,cls,noteText,color;
-  const blocked = flags.hardFail || flags.rejFail;
+  const blocked = flags.rejFail;
 
   if(pct===null && !blocked){
     gp.textContent='—';arc.style.strokeDashoffset=C;arc.style.stroke='#cfd3d6';
@@ -510,7 +481,7 @@ function renderVerdict(pct,earned,max,flags){
   }
   if(blocked){
     verdict='REJECT';cls='v-reject';color='var(--red)';
-    noteText = flags.hardFail ? 'Hard-fail override active.' : 'Instant-reject filter failed.';
+    noteText = 'Instant-reject filter failed.';
   } else if(pct>=80){verdict='ADOPT';cls='v-adopt';color='var(--green)';noteText='Strong across the board. Document hardening + set a review date.';}
   else if(pct>=65){verdict='ADOPT WITH CONDITIONS';cls='v-cond';color='var(--amber)';noteText='Good, with gaps. Note the conditions, or keep looking if a cleaner option exists.';}
   else if(pct>=50){verdict='LAST RESORT ONLY';cls='v-last';color='#c15400';noteText='Only if no viable alternative and gaps are mitigable. Owner sign-off required.';}
@@ -545,13 +516,11 @@ function collect(){
     lines.push(`\n### Card ${sec.card} · ${sec.title.replace(/&amp;/g,'&')}  (×${sec.weight}) — ${se}/${sm}\n${rows.join('\n')}`);
   });
   const pct = max>0?Math.round(earned/max*100):0;
-  const hardFail=[...document.querySelectorAll('.hard')].some(b=>b.checked);
   const rejFail=[...document.querySelectorAll('.rej')].some(b=>!b.checked)&&rejTouched();
-  let verdict = (hardFail||rejFail)?'REJECT (override)': pct>=80?'ADOPT': pct>=65?'ADOPT WITH CONDITIONS': pct>=50?'LAST RESORT ONLY':'REJECT';
+  let verdict = rejFail?'REJECT (instant-reject)': pct>=80?'ADOPT': pct>=65?'ADOPT WITH CONDITIONS': pct>=50?'LAST RESORT ONLY':'REJECT';
 
   const fit=[...document.querySelectorAll('#fit input')].map((b,i)=>`  - [${b.checked?'x':' '}] 2.${i+1} ${FIT[i][0]}`).join('\n');
   const rej=[...document.querySelectorAll('.rej')].map((b,i)=>`  - [${b.checked?'x':' '}] 3.${i+1} ${REJECT[i][0]}`).join('\n');
-  const hard=[...document.querySelectorAll('.hard')].map((b,i)=>b.checked?`  - [x] ${HARD[i][0]}`:null).filter(Boolean).join('\n')||'  - (none)';
 
   return `# Plugin Evaluation — ${g('m-name')||'(unnamed)'}
 
@@ -569,9 +538,7 @@ function collect(){
 ## Card 3 · Instant-reject filters (unchecked = failed)\n${rej}
 ${lines.join('\n')}
 
-## Card 10 · Hard-fail overrides\n${hard}
-
-## Card 11 · Decision
+## Card 10 · Decision
 - Conditions/hardening: ${g('d-cond')||'—'}
 - Reasoning: ${g('d-reason')||'—'}
 - Review date: ${g('d-review')||'—'}   Owner: ${g('d-owner')||'—'}
