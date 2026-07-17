@@ -6,8 +6,6 @@ or stake your name on.
 
 **[▶ Open the live tool](https://dknauss.github.io/wp-plugin-evaluator/)**
 
-![Verdict: a weighted score and go/no-go recommendation](https://img.shields.io/badge/verdict-live%20scoring-2271b1)
-
 ## What it does
 
 Work top to bottom through eleven numbered cards. As you go, a sticky bar keeps a live
